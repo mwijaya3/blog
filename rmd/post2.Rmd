@@ -22,26 +22,26 @@ pacman::p_load(dygraphs,
 ```
 
 
-## Preface
+## Introduction
 
 Let's start this post by asking the question of what kind of package in R or Python do you use for visualization/plotting purposes? Several packages that come to mind are **ggplot, matplotlib, and seaborn**.
 
 I do enjoy these packages and they are fantastic. After taking Information Visualization class (using d3.js) and worked as Teaching Assistant the following semester for the same class at Georgia Tech, it opened my world to interactive visualization. I don't know about you but I get super excited when I see stuff moving on the screen. For those who work in the industry at the moment, you probably use powerpoint/keynote presentation to communicate your result and finding to the business decision maker.
 
-Recently one of my coworker created am interactive **HTML** document to convey his finding. It was truly an inspiring moment where I had the opportunity to do the same couple of days later. I created a **HTML** file with interactive plots to communicate my idea and finding via Rmarkdown and Plotly visualization package in Rstudio.
+Recently one of my coworkers created an interactive **HTML** document to convey his finding. It was truly an inspiring moment where I had the opportunity to do the same couple of days later. I created an **HTML** file with interactive plots to communicate my idea and finding via Rmarkdown and Plotly visualization package in Rstudio.
 
-Unlike the traditional way of sending a powerpoint or keynote presentation, information is presented via an interactive plot where decision maker can interact with the plot and investigate anything that they found to be interesting. The advantage of Plotly package is that the plot can be zoomed, hovered, or even create an animation.
+Unlike the traditional way of sending a powerpoint or keynote presentation, information is presented via interactive plots where decision maker can interact with the plots and investigate anything that they found to be interesting. The advantage of Plotly package is that the plot can be zoomed, hovered, or even create an animation.
 
 
 ## Visualization Packages
 There are so many great visualization packages out there that I have never heard about. In R, there are a lot of packages that are classified as **htmlwidgets** where it works just like R plots except they produce interactive web visualizations.
 
-Believe it or not, these packages that I am going to introduce to you are awesome (imagine if you have to code this yourself from scratch). *Without further ado*, I will explain the usage for each of the packages and why they are awesome.
+Believe it or not, these packages that I am going to introduce to you are awesome (imagine if you have to code this yourself from scratch). Without further ado, I will explain the usage for each of the packages and why they are awesome.
 
 ### Dygraphs
 If you work with time series data, this package is great. All of the great visualization packages that I have known came out of JavaScript.
 
-*An interactive plot is worth a thousand words* (Yes, you guessed it. I modified the original saying). The plot below shows monthly deaths from lung diseases in the United Kingdom from 1974 - 1979.
+*An interactive plot is worth a thousand words* (Yes, you guessed it. I modified the original saying). The plot below shows monthly deaths from lung diseases in the United Kingdom from 1974 - 1979 ([Source](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/UKLungDeaths.html)).
 
 ```{r, echo=FALSE}
 lungDeaths <- cbind(ldeaths, mdeaths, fdeaths)
