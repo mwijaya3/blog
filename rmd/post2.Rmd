@@ -1,0 +1,173 @@
+---
+title: ""
+output: 
+  html_document:
+    theme: united
+    highlight: tango
+    fig_height: 7
+    fig.align: "center"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(pacman)
+pacman::p_load(dygraphs,
+               plotly,
+               gapminder,
+               rbokeh,
+               highcharter,
+               leaflet,
+               data.table)
+#devtools::install_github("jbkunst/highcharter")
+```
+
+
+## Preface
+
+Let's start this post by asking the question of what kind of package in R or Python do you use for visualization/plotting purposes? Several packages that come to mind are **ggplot, matplotlib, and seaborn**.
+
+I do enjoy these packages and they are fantastic. After taking Information Visualization class (using d3.js) and worked as Teaching Assistant the following semester for the same class at Georgia Tech, it opened my world to interactive visualization. I don't know about you but I get super excited when I see stuff moving on the screen. For those who work in the industry at the moment, you probably use powerpoint/keynote presentation to communicate your result and finding to the business decision maker.
+
+Recently one of my coworker created am interactive **HTML** document to convey his finding. It was truly an inspiring moment where I had the opportunity to do the same couple of days later. I created a **HTML** file with interactive plots to communicate my idea and finding via Rmarkdown and Plotly visualization package in Rstudio.
+
+Unlike the traditional way of sending a powerpoint or keynote presentation, information is presented via an interactive plot where decision maker can interact with the plot and investigate anything that they found to be interesting. The advantage of Plotly package is that the plot can be zoomed, hovered, or even create an animation.
+
+
+## Visualization Packages
+There are so many great visualization packages out there that I have never heard about. In R, there are a lot of packages that are classified as **htmlwidgets** where it works just like R plots except they produce interactive web visualizations.
+
+Believe it or not, these packages that I am going to introduce to you are awesome (imagine if you have to code this yourself from scratch). *Without further ado*, I will explain the usage for each of the packages and why they are awesome.
+
+### Dygraphs
+If you work with time series data, this package is great. All of the great visualization packages that I have known came out of JavaScript.
+
+*An interactive plot is worth a thousand words* (Yes, you guessed it. I modified the original saying). The plot below shows monthly deaths from lung diseases in the United Kingdom from 1974 - 1979.
+
+```{r, echo=FALSE}
+lungDeaths <- cbind(ldeaths, mdeaths, fdeaths)
+dygraph(lungDeaths, main = "Deaths from Lung Disease (UK)") %>%
+  dyHighlight(highlightCircleSize = 5, 
+              highlightSeriesBackgroundAlpha = 0.2,
+              hideOnMouseOut = FALSE) %>%
+  dyRangeSelector(dateWindow = c("1974-01-01", "1979-12-31"))
+```
+
+This package is my new favorite for time-series plot. You can do a lot of customization such as series highlighting, axis options, CSS styling, range selector, candlestick charts (like the one you have seen in [Robinhood](https://support.robinhood.com/hc/en-us/articles/360001325643-Using-Candlestick-Charts) or any trading applications), straw broom charts, prediction interval, showing events and limits, colored ribbon, and many more.
+
+### Plotly
+Plotly allows you to easily translate your ggplot graphics to an interactive web-based version, and also provides bindings to the plotly.js graphing library. Following the same pattern as the previous section, I will let the plot does the justice.
+
+```{r}
+p <- gapminder %>%
+  plot_ly(
+    x = ~gdpPercap, 
+    y = ~lifeExp, 
+    size = ~pop, 
+    color = ~continent, 
+    frame = ~year, 
+    text = ~country, 
+    hoverinfo = "text",
+    type = 'scatter',
+    mode = 'markers'
+  ) %>%
+  layout(
+    xaxis = list(
+      type = "log"
+    )
+  ) %>% 
+  animation_opts(
+    1000, easing = "elastic", redraw = FALSE
+  ) %>% 
+  animation_button(
+    x = 1, xanchor = "right", y = 0, yanchor = "bottom"
+  ) %>%
+  animation_slider(
+    currentvalue = list(prefix = "YEAR ", font = list(color="red"))
+  )
+p
+```
+If you are into visualization, the plot above is the classic gapminder visualization by Hans Rosling. I recommend watching his [Ted Talks](https://www.youtube.com/watch?v=hVimVzgtD6w). There are so many things you can do with plotly with ggplot combination ranging from basic charts, statistical charts, scientific charts, financial charts, maps, 3D charts, animation, and many more.
+
+
+### Bokeh
+Bokeh is a visualization library that provides a flexible and powerful declarative framework for creating web-based plots. The visualization created using Bokeh is elegant and very interactive.
+
+Again, let's default to showing an example using the famous **iris** dataset.
+
+```{r}
+p_bokeh <- figure() %>%
+  ly_points(Sepal.Length, Sepal.Width, data = iris,
+    color = Species, glyph = Species,
+    hover = list(Sepal.Length, Sepal.Width))
+p_bokeh
+```
+There are so many things we can do with Bokeh such as visualizing periodic table, a map of the world, time series plot, scatterplot matrix, hexbin plot, topography with contour line, embedding image in a figure, boxplot, quantile plot, and many more.
+
+### Highcharter
+As the main page of *Highcharts* would describe it: **Make your data come alive**. This is by far my favorite package because of how smooth the visualization is.
+
+Let's take a look of choropleth map of US unemployment data by counties generated using **Highcharter** package in R.
+
+```{r}
+data(unemployment)
+
+hcmap("countries/us/us-all-all", data = unemployment,
+      name = "Unemployment", value = "value", joinBy = c("hc-key", "code"),
+      borderColor = "transparent") %>%
+  hc_colorAxis(dataClasses = color_classes(c(seq(0, 10, by = 2), 50))) %>% 
+  hc_legend(layout = "vertical", align = "right",
+            floating = TRUE, valueDecimals = 0, valueSuffix = "%") 
+```
+As you browse through the choropleth map, do you notice how smooth the transition is from one county to another? Words can't do it justice. 
+This visualization package has one of the most comprehensive usages that I have encountered so far. You can visualize maps, scatterplot, boxplot, time-series plot, and anything you can think of.
+
+Since I like this package so much, I will end this section with another cool plot (Weathers Radials plot).
+
+```{r}
+data("weather")
+
+x <- c("Min", "Mean", "Max")
+y <- sprintf("{point.%s}", c("min_temperaturec", "mean_temperaturec", "max_temperaturec"))
+tltip <- tooltip_table(x, y)
+
+hchart(weather, type = "columnrange",
+       hcaes(x = date, low = min_temperaturec, high = max_temperaturec,
+             color = mean_temperaturec)) %>%
+  hc_chart(polar = TRUE) %>%
+  hc_yAxis( max = 30, min = -10, labels = list(format = "{value} C"),
+            showFirstLabel = FALSE) %>%
+  hc_xAxis(
+    title = list(text = ""), gridLineWidth = 0.5,
+    labels = list(format = "{value: %b}")) %>%
+  hc_tooltip(useHTML = TRUE, pointFormat = tltip,
+             headerFormat = as.character(tags$small("{point.x:%d %B, %Y}")))
+```
+
+### Leaflet
+Who doesn't like dynamic maps? Have you wondered why the **NY Times and Washington Post** have awesome interactive maps on their article? I bet everyone has interacted with a map application (Google Maps, Waze, Uber, Lyft, your GPS in your car, etc) at some point in their life. Thanks to the **Leaflet** package, my life is so much easier when it comes to visualizing map that is interactive with a lot of customization such as annotations (markers, polygons, popups), panning, and zooming. If you are tired of the same theme for the map, you can customize your map.
+
+```{r}
+orstationc <- data.table::fread("orstationc.csv", data.table = F)
+
+pal <- colorQuantile("YlOrRd", NULL, n = 8)
+leaflet(orstationc) %>% 
+  addTiles() %>%
+  addCircleMarkers(color = ~pal(tann))
+```
+
+
+## Conclusion
+That's a lot of discussion on visualization and I can't get enough of it. Instead of creating a presentation for your future deliverable, perhaps considering what I have discussed above. There are other packages that I didn't mention but they are cool as well. Note that some of the visualization packages stated above might not be available in Python (I am positive that Python has something equivalent/similar) but they are available in R. I will put all of the references on the next section. Feel free to contact me if you have any questions about anything and thanks for reading.
+
+
+## Reference
+* [Rmarkdown](https://rmarkdown.rstudio.com/)
+* [htmlwidget](https://www.htmlwidgets.org/showcase_leaflet.html)
+* [dygraphs](http://dygraphs.com/)
+* [plotly](https://plot.ly/javascript/)
+* [bokeh](http://bokeh.pydata.org/en/latest/)
+* [highcharts](https://www.highcharts.com/)
+* [leaflet](https://leafletjs.com/)
+
+
+
